@@ -3,6 +3,8 @@ package com.example.artemmakarcev.sqlex;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Notification;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -31,10 +33,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -51,25 +56,23 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     private static final int REQUEST_READ_CONTACTS = 0;
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    private UserLoginTask mAuthTask = null;
+//    private static final String[] DUMMY_CREDENTIALS = new String[]{
+//            "foo@example.com:hello", "bar@example.com:world"
+//    };
+//    private UserLoginTask mAuthTask = null;
     // UI references.
-    private AutoCompleteTextView mEmailView;
+    private EditText mLoginView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     public static String LOG_TAG = "my_log";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
-
+        mLoginView = (EditText) findViewById(R.id.login);
+//        populateAutoComplete();
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -86,7 +89,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+//                attemptLogin();
+               new UserLoginTask().execute();
             }
         });
 
@@ -110,7 +114,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(mLoginView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
@@ -147,13 +151,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //        if (mAuthTask != null) {
 //            return;
 //        }
-//
-//        // Reset errors.
-//        mEmailView.setError(null);
+
+        // Reset errors.
+//        mLoginView.setError(null);
 //        mPasswordView.setError(null);
-//
-//        // Store values at the time of the login attempt.
-//        String email = mEmailView.getText().toString();
+
+        // Store values at the time of the login attempt.
+//        String login = mLoginView.getText().toString();
 //        String password = mPasswordView.getText().toString();
 //
 //        boolean cancel = false;
@@ -185,56 +189,57 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //            // Show a progress spinner, and kick off a background task to
 //            // perform the user login attempt.
 //            showProgress(true);
-//            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+//            mAuthTask = new UserLoginTask(login, password);
+//            mAuthTask.execute((Void) null);
+//        mAuthTask.execute();
 //        }
     }
 
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
-    }
+//    private boolean isEmailValid(String email) {
+//        //TODO: Replace this with your own logic
+//        return email.contains("@");
+//    }
+//
+//    private boolean isPasswordValid(String password) {
+//        //TODO: Replace this with your own logic
+//        return password.length() > 4;
+//    }
 
     /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+//    private void showProgress(final boolean show) {
+//        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+//        // for very easy animations. If available, use these APIs to fade-in
+//        // the progress spinner.
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+//            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//
+//            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+//            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+//                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+//                }
+//            });
+//
+//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            mProgressView.animate().setDuration(shortAnimTime).alpha(
+//                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//                }
+//            });
+//        } else {
+//            // The ViewPropertyAnimator APIs are not available, so simply show
+//            // and hide the relevant UI components.
+//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+//        }
+//    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -262,23 +267,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cursor.moveToNext();
         }
 
-        addEmailsToAutoComplete(emails);
+//        addEmailsToAutoComplete(emails);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
     }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -290,28 +285,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public void NextActivity(String token) {
+        Intent intent = new Intent(this, UserActivity.class);
+        intent.putExtra("token", token);
+        LoginActivity.this.finish();
+        startActivity(intent);
+    }
 
-        private final String mEmail;
-        private final String mPassword;
+    /**
+     * Авторизация пользователя через логин и пароль
+     */
+    public class UserLoginTask extends AsyncTask<Void, Void, String> {
+
+//        private final String mLogin;
+//        private final String mPassword;
 
         HttpsURLConnection conn = null;
         BufferedReader reader = null;
         String resultJson = "";
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
+        String userLogin = mLoginView.getText().toString();
+        String userPassword = mPasswordView.getText().toString();
+
+//        UserLoginTask(String email, String password) {
+//            mLogin = email;
+//            mPassword = password;
+//        }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             try {
-
+                /**
+                 * Настройка подключения
+                 */
                 URL url = new URL("https://sql.ma-dev.cloud/api/v1/login");
                 conn = (HttpsURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
@@ -320,11 +326,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
 //                conn.connect();
-
+                /**
+                 * Формирование JSON для отправки
+                 */
                 JSONObject jsonParam = new JSONObject();
-//                jsonParam.put("timestamp", 1488873360);
-                jsonParam.put("login", "admin");
-                jsonParam.put("password", "123456");
+                jsonParam.put("login", userLogin);
+                jsonParam.put("password", userPassword);
 //                jsonParam.put("latitude", 0D);
 //                jsonParam.put("longitude", 0D);
 
@@ -332,51 +339,62 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
                 //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
                 os.writeBytes(jsonParam.toString());
-
                 os.flush();
                 os.close();
+                /**
+                 * Запись полученных данных в строку
+                 */
+                InputStream inputStream = conn.getInputStream();
+                StringBuilder builder = new StringBuilder();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+                resultJson = builder.toString();
 
-                Log.i("my_log", String.valueOf(conn.getResponseCode()));
-                Log.i("my_log" , conn.getResponseMessage());
+                Log.d("my_log", String.valueOf(conn.getResponseCode()));
+                Log.d("my_log" , conn.getResponseMessage());
+                Log.d("my_log", resultJson);
 
                 conn.disconnect();
 
-                // Simulate network access.
-//              Thread.sleep(2000);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
             // TODO: register the new account here.
-            return true;
+            return resultJson;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
+        protected void onPostExecute(String strJson) {
+            super.onPostExecute(strJson);
+//            mAuthTask = null;
+//            showProgress(false);
+            Log.d("my_log", strJson);
+            try {
+                JSONObject jsonObject = new JSONObject(strJson);
+                    String login = jsonObject.getString("login");
+                    String token = jsonObject.getString("access_token");
+                    Log.d(LOG_TAG, "Логин " + login + " Токин " + token);
+                    if (token.isEmpty()){
+                        Log.d(LOG_TAG, "Ошибка");
+                    } else {
+                        NextActivity(token);
+                    }
 
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+
+            //            if (success) {
+////                finish();
+//            } else {
+//                mPasswordView.setError(getString(R.string.error_incorrect_password));
+//                mPasswordView.requestFocus();
+//            }
         }
 
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
     }
 }
 
