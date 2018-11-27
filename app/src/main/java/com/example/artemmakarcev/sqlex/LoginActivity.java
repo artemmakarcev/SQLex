@@ -285,8 +285,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    public void NextActivity(String token) {
-        Intent intent = new Intent(this, UserActivity.class);
+    public void NextActivity(String login,String token) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("login", login);
         intent.putExtra("token", token);
         LoginActivity.this.finish();
         startActivity(intent);
@@ -380,7 +381,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     if (token.isEmpty()){
                         Log.d(LOG_TAG, "Ошибка");
                     } else {
-                        NextActivity(token);
+                        NextActivity(login, token);
                     }
 
             } catch (JSONException e) {
