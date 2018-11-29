@@ -17,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.artemmakarcev.sqlex.POJO.GetAllEx;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,12 +26,15 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public List<GetAllEx> getAllItems = new ArrayList<>();
     public static String LOG_TAG = "my_log";
     private TextView mTextJson;
     private TextView nameUser;
@@ -45,20 +50,20 @@ public class MainActivity extends AppCompatActivity
         String login = intent.getStringExtra("login");
         String token = intent.getStringExtra("token");
 
-        mTextJson =findViewById(R.id.ex);
+        mTextJson =findViewById(R.id.nameEx);
 
         nameUser =findViewById(R.id.textView);
 
 //        nameUser.setText(login);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -122,15 +127,9 @@ public class MainActivity extends AppCompatActivity
             intent1.putExtra("token", token);
             startActivity(intent1);
         } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            Intent intent = new Intent(this, LoginActivity.class);
+            MainActivity.this.finish();
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -152,9 +151,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected String doInBackground(Void... params) {
             try {
-                /**
-                 * Настройка подключения
-                 */
                 Intent intent = getIntent();
                 String token = intent.getStringExtra("token");
                 Log.d("my_log", "token " + token);
@@ -162,14 +158,7 @@ public class MainActivity extends AppCompatActivity
                 URL url = new URL("https://sql.ma-dev.cloud/api/v1/exercises");
                 conn = (HttpsURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                //conn.setRequestProperty("Authorization", token);
-//                conn.setRequestProperty("Accept","Authorization");
-//                conn.setDoOutput(true);
-//                conn.setDoInput(true);
                 conn.connect();
-                /**
-                 * Запись полученных данных в строку
-                 */
                 InputStream inputStream = conn.getInputStream();
                 StringBuilder builder = new StringBuilder();
                 reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -178,11 +167,7 @@ public class MainActivity extends AppCompatActivity
                     builder.append(line);
                 }
                 resultJson = builder.toString();
-
-                Log.d("my_log", String.valueOf(conn.getResponseCode()));
-                Log.d("my_log" , conn.getResponseMessage());
                 Log.d("my_log", "Полученные данные " + resultJson);
-
                 conn.disconnect();
 
             } catch (Exception e) {
@@ -208,12 +193,6 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
 
-            //            if (success) {
-////                finish();
-//            } else {
-//                mPasswordView.setError(getString(R.string.error_incorrect_password));
-//                mPasswordView.requestFocus();
-//            }
         }
 
     }
