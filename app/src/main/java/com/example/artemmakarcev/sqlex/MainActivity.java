@@ -1,12 +1,11 @@
 package com.example.artemmakarcev.sqlex;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,10 +14,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.artemmakarcev.sqlex.POJO.GetAllEx;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,23 +38,24 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public List<GetAllEx> getAllItems = new ArrayList<>();
+    private Adapter adapter;
     public static String LOG_TAG = "my_log";
-    private TextView mTextJson;
     private TextView nameUser;
+    private SharedPreferences.Editor loginPrefsEditor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
         String login = intent.getStringExtra("login");
         String token = intent.getStringExtra("token");
 
-        mTextJson =findViewById(R.id.nameEx);
-
+        TextView mTextJson = findViewById(R.id.nameEx);
         nameUser =findViewById(R.id.textView);
 
 //        nameUser.setText(login);
@@ -65,23 +69,38 @@ public class MainActivity extends AppCompatActivity
 //            }
 //        });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ListView listView = findViewById(R.id.list);
+
+        adapter = new Adapter(this, new ArrayList<GetAllEx>());
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, UserActivity.class);
+//                intent.putExtra("id", adapter.getItem(position));
+//                intent.putExtra("urlImage", adapter.getUrlImage(position));
+//                intent.putExtra("nameTitle", adapter.getNameTitle(position));
+                startActivity(intent);
+            }
+        });
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-
-
+//        TextView mLoginUser = findViewById(R.id.nameUser);
+//        mLoginUser.setText("Вы вошди как ");
         new Exercises().execute();
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -128,11 +147,16 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent1);
         } else if (id == R.id.nav_gallery) {
             Intent intent = new Intent(this, LoginActivity.class);
+            SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+            loginPrefsEditor = loginPreferences.edit();
+            loginPrefsEditor.apply();
+            loginPrefsEditor.putString("password", "");
+            loginPrefsEditor.commit();
             MainActivity.this.finish();
             startActivity(intent);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -142,6 +166,7 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class Exercises extends AsyncTask<Void, Void, String> {
 
         HttpsURLConnection conn = null;
@@ -170,6 +195,16 @@ public class MainActivity extends AppCompatActivity
                 Log.d("my_log", "Полученные данные " + resultJson);
                 conn.disconnect();
 
+                try {
+                    JSONArray arr = new JSONArray(builder.toString());
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject object = arr.getJSONObject(i);
+                        getAllItems.add(new GetAllEx(object.getString("id"), object.getString("name"), object.getString("description")));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -183,15 +218,17 @@ public class MainActivity extends AppCompatActivity
 //            mAuthTask = null;
 //            showProgress(false);
             Log.d("my_log", strJson);
-            mTextJson.setText(strJson);
-            try {
-                JSONObject jsonObject = new JSONObject(strJson);
+            adapter.data = getAllItems;
+            adapter.notifyDataSetChanged();
+//            mTextJson.setText(strJson);
+//            try {
+//                JSONObject jsonObject = new JSONObject(strJson);
 //                String login = jsonObject.getString("login");
 //                String token = jsonObject.getString("access_token");
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 
         }
 

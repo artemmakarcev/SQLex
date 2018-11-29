@@ -4,7 +4,13 @@ public class GetAllEx {
     private Database database;
     private String name;
     private String description;
-    private int id;
+    private String id;
+
+    public GetAllEx(String id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 
     public void setDatabase(Database database){
         this.database = database;
@@ -30,22 +36,13 @@ public class GetAllEx {
         return description;
     }
 
-    public void setId(int id){
+    public void setId(String id){
         this.id = id;
     }
 
-    public int getId(){
+    public String getId(){
         return id;
     }
 
-    @Override
-    public String toString(){
-        return
-                "Response{" +
-                        "database = '" + database + '\'' +
-                        ",name = '" + name + '\'' +
-                        ",description = '" + description + '\'' +
-                        ",id = '" + id + '\'' +
-                        "}";
-    }
+
 }

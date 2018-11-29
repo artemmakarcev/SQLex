@@ -83,11 +83,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
         loginPrefsEditor.apply();
-        if (loginPreferences.getString("username", "") != ""){
+        if ((loginPreferences.getString("password", "")) != ""){
             mLoginView.setText(loginPreferences.getString("username", ""));
-//            mSaveLogin.isChecked();
+            mPasswordView.setText(loginPreferences.getString("password", ""));
             mSaveLogin.setChecked(true);
+            Enter(null);
+        } else {
+            mLoginView.setText(loginPreferences.getString("username", ""));
         }
+
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
